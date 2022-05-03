@@ -98,10 +98,8 @@ cfmCaret2
 
 
 ```{r modelo con Caret 3 - neurona regresion pcaNNEt}
-train$SalePrice<- as.numeric(train$SalePrice)
-redCaret3 <- train(SalePrice~., data=train, type=c("Regression"), method="pcaNNet", trace=F)
+redCaret3 <- train(SalePrice~., data=train,  method="brnn", trace=F)
 test$prediccionCaret<-predict(redCaret3, newdata = test)
-test
 ```
 ```
 
