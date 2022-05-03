@@ -37,8 +37,8 @@ library(pheatmap) #Para hacer mapa de calor
 library(caret)
 library(nnet)
 library(RWeka)
-library(neural)
-library(dummy)
+#library(neural)
+#library(dummy)
 library(neuralnet)
 ```
 
@@ -98,11 +98,44 @@ cfmCaret2
 
 
 ```{r modelo con Caret 3 - neurona regresion pcaNNEt}
-redCaret3 <- train(SalePrice~., data=train,  method="brnn", trace=F)
-test$prediccionCaret<-predict(redCaret3, newdata = test)
-```
+set.seed(546)
+
+nnet.fit <- nnet(SalePrice/max(train$SalePrice)~., data=train, size=2, linear.output = FALSE) 
+nnet.fit <- nnet(SalePrice/max(train$SalePrice)~., data=train, size=2, linear.output = FALSE) 
+  
+
+nnet.predict <- predict(nnet.fit, newdata = test)*max(train$SalePrice)
+ 
+
+mean((nnet.predict - test$SalePrice)^2) 
+ 
+plot(test$SalePrice, nnet.predict,
+    main="Neural network predictions vs actual",
+    xlab="Actual")
+
+
 ```
 
+
+```{r}
+set.seed(546)
+
+nnet.fit <- nnet(SalePrice/max(train$SalePrice)~., data=train, size=2, linear.output = FALSE) 
+nnet.fit <- nnet(SalePrice/max(train$SalePrice)~., data=train, size=2, linear.output = TRUE, decay=5e-4) 
+
+  
+nnet.predict <- predict(nnet.fit, newdata = test)*max(train$SalePrice)
+ 
+
+mean((nnet.predict - test$SalePrice)^2) 
+ 
+plot(test$SalePrice, nnet.predict,
+    main="Neural network predictions vs actual",
+    xlab="Actual")
+
+
+
+```
 
 
 
