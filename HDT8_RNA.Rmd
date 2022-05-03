@@ -64,11 +64,12 @@ data2$SalePrice <- NULL
 data2$PriceRange <- as.factor(data2$PriceRange)
 
 
+
 data
 data2
 ```
 
-```{r}
+```{r sets de entrenamiento}
 corte <- sample(nrow(data),nrow(data)*0.7)
 train<-data[corte,]
 test<-data[-corte,]
@@ -80,11 +81,28 @@ test2<-data2[-corte2,]
 
 ```
 
-```{r}
+```{r modelo con Caret 1 - neuronal clasificacion nnet}
 redCaret <- train(PriceRange~., data=train2, method="nnet", trace=F)
 test2$prediccionCaret<-predict(redCaret, newdata = test2)
 cfmCaret<-confusionMatrix(test2$prediccionCaret,test2$PriceRange)
 cfmCaret
+```
+
+
+```{r modelo con Caret 2 - neurona clasificacion pcaNNEt}
+redCaret2 <- train(PriceRange~., data=train2, method="pcaNNet", trace=F)
+test2$prediccionCaret<-predict(redCaret2, newdata = test2)
+cfmCaret2<-confusionMatrix(test2$prediccionCaret,test2$PriceRange)
+cfmCaret2
+```
+
+
+```{r modelo con Caret 3 - neurona regresion pcaNNEt}
+train$SalePrice<- as.numeric(train$SalePrice)
+redCaret3 <- train(SalePrice~., data=train, type=c("Regression"), method="pcaNNet", trace=F)
+test$prediccionCaret<-predict(redCaret3, newdata = test)
+test
+```
 ```
 
 
