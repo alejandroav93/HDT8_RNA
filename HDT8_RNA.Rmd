@@ -1,0 +1,92 @@
+---
+title: "HDT8_RNA"
+author: "Alejandro Alvarez, Jorge De Leon Pinelo"
+date: "5/2/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE,warning=FALSE}
+#install.packages("nnet")
+#install.packages("RWeka")
+#install.packages("neuralnet")
+library("tidyverse")
+library("dplyr")
+library("ggplot2")
+library("httr")
+library("readr")
+library(rpart)
+library(caret)
+library(randomForest)
+library(tree)
+library(rpart.plot)
+library(car)
+library(cluster) #Para calcular la silueta
+library(e1071)#para cmeans
+library(mclust) #mixtures of gaussians
+library(fpc) #para hacer el plotcluster
+library(NbClust) #Para determinar el número de clusters óptimo
+library(factoextra) #Para hacer gráficos bonitos de clustering
+library(hopkins) #Para revisar si vale la pena hacer agrupamiento
+library(GGally) #Para hacer el conjunto de graficos
+library(FeatureImpCluster) #Para revisar la importancia de las variables en los grupos.
+library(pheatmap) #Para hacer mapa de calor
+library(caret)
+library(nnet)
+library(RWeka)
+library(neural)
+library(dummy)
+library(neuralnet)
+```
+
+```{r}
+house <- read.csv("./train.csv", stringsAsFactors = F)
+quant <- quantile(house$SalePric)
+```
+
+
+```{r}
+set.seed(123)
+#se toman las variables que se cree predicen propiamente el precio de la casa y el precio real de la casa.
+#luego se reemplaza la columna del precio de la casa por una que lo clasifica como economica, intermedio o cara dependiendo de los percentiles.
+data <- fread("./train.csv", select = c("OverallQual","GrLivArea", "GarageCars", "SalePrice", "YearBuilt"))
+#data <- data %>% mutate(Economica = if_else(quant["0%"] <= SalePrice & SalePrice < quant["25%"], 1,0))
+#data <- data %>% mutate(Intermedia = if_else(quant["25%"] <= SalePrice & SalePrice < quant["50%"], 1,0))
+#data <- data %>% mutate(Cara = if_else(quant["50%"] <= SalePrice, 1,0))
+
+data$OverallQual[data$OverallQual == 'NaN'] <- 0
+data2 <- data %>% mutate(PriceRange = if_else(quant["0%"] <= SalePrice & SalePrice < quant["25%"], "Economica", 
+                                              if_else(quant["25%"] <= SalePrice & SalePrice < quant["50%"], "Intermedia", "Cara") ))
+data2$SalePrice <- NULL
+data2$PriceRange <- as.factor(data2$PriceRange)
+
+
+data
+data2
+```
+
+```{r}
+corte <- sample(nrow(data),nrow(data)*0.7)
+train<-data[corte,]
+test<-data[-corte,]
+
+
+corte2 <- sample(nrow(data2),nrow(data2)*0.7)
+train2<-data2[corte2,]
+test2<-data2[-corte2,]
+
+```
+
+```{r}
+redCaret <- train(PriceRange~., data=train2, method="nnet", trace=F)
+test2$prediccionCaret<-predict(redCaret, newdata = test2)
+cfmCaret<-confusionMatrix(test2$prediccionCaret,test2$PriceRange)
+cfmCaret
+```
+
+
+
+
